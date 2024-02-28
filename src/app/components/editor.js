@@ -24,7 +24,7 @@ export default function Editor() {
         setAnalysisResults(data);
       })
       .catch((error) => console.error("Error:", error))
-      .finally(() => setIsLoading(false)); // Hide spinner
+      .finally(() => setIsLoading(false));
   };
   return (
     <div
@@ -50,16 +50,16 @@ export default function Editor() {
         <CodeMirror
           value={code}
           height="60vh"
-          className="dark" // Replace with Tailwind classes
+          className="dark"
           theme="dark"
           extensions={[langs.python()]}
           onChange={onChange}
         />
         <button
           onClick={handleAnalyzeCode}
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          className="bg-indigo-500 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded"
         >
-          Analyze Code
+          Analyze
         </button>
       </div>
       <div className="w-[40vw] flex flex-col text-center">
@@ -70,7 +70,7 @@ export default function Editor() {
           className={
             isLoading
               ? "flex items-center justify-center h-[60vh]"
-              : "p-4 bg-gray-700 text-white text-lg overflow-y-auto"
+              : "p-4 bg-gray-700 text-white text-lg overflow-y-auto max-h-[60vh]"
           }
         >
           {analysisResults ? (
