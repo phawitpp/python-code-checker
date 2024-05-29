@@ -14,7 +14,7 @@ export default function Editor() {
   const handleAnalyzeCode = () => {
     setAnalysisResults(null);
     setIsLoading(true);
-    fetch("http://localhost:5000/api/analyze", {
+    fetch(process.env.NEXT_PUBLIC_API_URL + "/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
