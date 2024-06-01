@@ -6,25 +6,37 @@ import { ScaleLoader } from "react-spinners";
 export default function Editor() {
   const [code, setCode] = useState("");
   const [analysisResults, setAnalysisResults] = useState(null);
+  const [compileResults, setCompileResults] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const onChange = useCallback((value, viewUpdate) => {
     setCode(value);
   }, []);
-  const handleAnalyzeCode = () => {
+  const handleAnalyzeCode = async () => {
     setAnalysisResults(null);
     setIsLoading(true);
-    fetch(process.env.NEXT_PUBLIC_API_URL + "/api/analyze", {
+    const data = await fetch(process.env.NEXT_PUBLIC_API_URL + "/api/analyze", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code }),
     })
-      .then((response) => response.json())
+      .then((res) => res.json())
       .then((data) => {
         setAnalysisResults(data);
-      })
-      .catch((error) => console.error("Error:", error))
-      .finally(() => setIsLoading(false));
+      });
+    const data2 = await fetch(
+      process.env.NEXT_PUBLIC_COMPILE_URL +
+        "/submissions/?base64_encoded=false&wait=true",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ source_code: code, language_id: 71 }),
+      }
+    );
+    const result2 = await data2.json();
+    setCompileResults(result2);
+    console.log(result2);
+    setIsLoading(false);
   };
   return (
     <div
@@ -74,19 +86,41 @@ export default function Editor() {
           }
         >
           {analysisResults ? (
-            <ul>
-              {analysisResults.results.map((result) => (
-                <li
-                  key={result.msg_id}
-                  className="text-left border-b border-gray-600 py-2"
-                >
-                  <b>
-                    {result.msg} ({result.symbol})
-                  </b>
-                  <p className="font-bold text-red-500">Line: {result.line}</p>
-                </li>
-              ))}
-            </ul>
+            <div>
+              <ul>
+                {analysisResults.results?.map((result) => (
+                  <li
+                    key={result.msg_id}
+                    className="text-left border-b border-gray-600 py-2"
+                  >
+                    <b>
+                      {result.msg} ({result.symbol})
+                    </b>
+                    <p className="font-bold text-red-500">
+                      Line: {result.line}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+              <h1 className="text-center text-white text-2xl font-bold p-4">
+                Compile Result
+              </h1>
+              <p className="text-left border-b border-gray-600 py-2">
+                {"Status: " + compileResults.status?.description}
+              </p>
+              <p className="text-left border-b border-gray-600 py-2">
+                {"Output: " + compileResults.stdout}
+              </p>
+              <p className="text-left border-b border-gray-600 py-2">
+                {"Error: " + compileResults.stderr}
+              </p>
+              <p className="text-left border-b border-gray-600 py-2">
+                {"Time taken" + compileResults.time + "s"}
+              </p>
+              <p className="text-left border-b border-gray-600 py-2">
+                {compileResults.memory + "KB"}
+              </p>
+            </div>
           ) : isLoading ? (
             <div className="flex items-center justify-center h-[60vh]">
               <ScaleLoader color="#36d7b7" />
